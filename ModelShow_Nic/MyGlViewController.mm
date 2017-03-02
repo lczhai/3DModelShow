@@ -137,7 +137,8 @@ struct pointInfo
     
     
     //自定义导航栏返回按钮
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"返回" style:UIBarButtonItemStyleDone target:self action:@selector(backButton_OnClick:)];
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"back" style:UIBarButtonItemStyleDone target:self action:@selector(backButton_OnClick:)];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"changecolor" style:UIBarButtonItemStyleDone target:self action:@selector(changeColor)];
     //获取当前的当行进程内的所有ViewController
     NSMutableArray *oldViewControllers =[[NSMutableArray alloc]initWithArray: self.navigationController.viewControllers];
     //    [oldViewControllers removeObject:self];
@@ -196,12 +197,24 @@ struct pointInfo
         //给多段选择视图一个颜色
         seg.tintColor = [UIColor blueColor];
         [seg addTarget:self action:@selector(segmentChanged:) forControlEvents:UIControlEventValueChanged];//添加事件
-        [self.view addSubview:seg];
+        [glview addSubview:seg];
     }
-    
-    
-    
 }
+#pragma mark -- 改变模型颜色
+- (void)changeColor{
+    NSArray *color = [self randomColor];
+    self.effect.light0.diffuseColor = GLKVector4Make([color[0] floatValue], [color[1] floatValue], [color[2] floatValue], 1.0);//漫反射颜色,依然按照rgb
+}
+#pragma mark -- 获取随机颜色
+- (NSArray *) randomColor
+{
+    CGFloat hue = ( arc4random() % 256 / 256.0 ); //0.0 to 1.0
+    CGFloat saturation = ( arc4random() % 256 / 256.0 ) ; // 0.0 to 1.0,away from white
+    CGFloat brightness = ( arc4random() % 256 / 256.0 ) ; //0.0 to 1.0,away from black
+    NSArray *rgbArray = [NSArray arrayWithObjects:[NSString stringWithFormat:@"%g",hue],[NSString stringWithFormat:@"%g",saturation],[NSString stringWithFormat:@"%g",brightness], nil];
+    return rgbArray;
+}
+
 
 #pragma mark -- 按钮点击事件
 - (void)segmentChanged:(UISegmentedControl *)sender
@@ -443,6 +456,7 @@ struct pointInfo
     
     
     
+//    glClearColor(131/255.0, 166/255.0, 205/255.0, 1.0f);
     glClearColor(131/255.0, 166/255.0, 205/255.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     
