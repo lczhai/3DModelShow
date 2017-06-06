@@ -44,8 +44,8 @@
 		A412B06C1CE074AC00B4545C /* SVProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SVProgressHUD.m; sourceTree = "<group>"; };
 		A4352F681CDC26E000384509 /* ObjePraser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjePraser.h; sourceTree = "<group>"; };
 		A4352F691CDC26E000384509 /* ObjePraser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ObjePraser.m; sourceTree = "<group>"; };
-		A43B8ED01D07B3E400AF78E2 /* man11.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = man11.obj; sourceTree = "<group>"; };
-		A44CDA0C1C56017A007307FE /* k3.stl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = k3.stl; sourceTree = "<group>"; };
+		A43B8ED01D07B3E400AF78E2 /* man11.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = man11.obj; path = stl_parser/man11.obj; sourceTree = "<group>"; };
+		A44CDA0C1C56017A007307FE /* k3.stl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = k3.stl; path = stl_parser/k3.stl; sourceTree = "<group>"; };
 		A4B1E2D81C4F650F006328FE /* ModelShow_Nic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ModelShow_Nic.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A4B1E2DC1C4F650F006328FE /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		A4B1E2DE1C4F650F006328FE /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -58,7 +58,7 @@
 		A4B1E2F31C4F6555006328FE /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		A4B1E2FF1C4F664E006328FE /* STLParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STLParser.h; sourceTree = "<group>"; };
 		A4B1E3001C4F664E006328FE /* STLParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STLParser.m; sourceTree = "<group>"; };
-		A4B1E3021C4F666E006328FE /* Tulips.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Tulips.JPG; sourceTree = "<group>"; };
+		A4B1E3021C4F666E006328FE /* Tulips.JPG */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = Tulips.JPG; path = stl_parser/Tulips.JPG; sourceTree = "<group>"; };
 		A4B1E3041C4F667B006328FE /* v.shader */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = v.shader; sourceTree = "<group>"; };
 		A4B1E3051C4F667B006328FE /* f.shader */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = f.shader; sourceTree = "<group>"; };
 		A4B1E3101C4F6B5D006328FE /* MyGlViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyGlViewController.h; sourceTree = "<group>"; };
@@ -66,7 +66,7 @@
 		A4B1E3121C4F6B5D006328FE /* MyGlViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MyGlViewController.xib; sourceTree = "<group>"; };
 		A4B1E31B1C50C3AE006328FE /* RootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootViewController.h; sourceTree = "<group>"; };
 		A4B1E31C1C50C3AE006328FE /* RootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootViewController.m; sourceTree = "<group>"; };
-		A4B1E31E1C50C5F5006328FE /* 哆啦A梦.stl */ = {isa = PBXFileReference; lastKnownFileType = file; path = "哆啦A梦.stl"; sourceTree = "<group>"; };
+		A4B1E31E1C50C5F5006328FE /* 哆啦A梦.stl */ = {isa = PBXFileReference; lastKnownFileType = file; name = "哆啦A梦.stl"; path = "stl_parser/哆啦A梦.stl"; sourceTree = "<group>"; };
 		A4D2C6361CEBF9F1004E4D23 /* NewParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewParser.h; sourceTree = "<group>"; };
 		A4D2C6371CEBF9F1004E4D23 /* NewParser.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = NewParser.mm; sourceTree = "<group>"; };
 		A4D2C6391CEBFC5C004E4D23 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
@@ -88,6 +88,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2B64A1371EE64B2C00E5584A /* Resource */ = {
+			isa = PBXGroup;
+			children = (
+				A4B1E3021C4F666E006328FE /* Tulips.JPG */,
+				A43B8ED01D07B3E400AF78E2 /* man11.obj */,
+				A44CDA0C1C56017A007307FE /* k3.stl */,
+				A4B1E31E1C50C5F5006328FE /* 哆啦A梦.stl */,
+			);
+			name = Resource;
+			sourceTree = "<group>";
+		};
 		A412B0361CE0428E00B4545C /* ModelFileParser */ = {
 			isa = PBXGroup;
 			children = (
@@ -131,23 +142,24 @@
 		A4B1E2DA1C4F650F006328FE /* ModelShow_Nic */ = {
 			isa = PBXGroup;
 			children = (
+				A412B0361CE0428E00B4545C /* ModelFileParser */,
+				A4B1E2FE1C4F6606006328FE /* stl_parser */,
+				2B64A1371EE64B2C00E5584A /* Resource */,
 				A4D79DF81CE3074600DEA03A /* NScode */,
 				A412B0691CE074AC00B4545C /* SVProgressHUD */,
 				A4B1E2DE1C4F650F006328FE /* AppDelegate.h */,
 				A4B1E2DF1C4F650F006328FE /* AppDelegate.m */,
 				A4B1E31B1C50C3AE006328FE /* RootViewController.h */,
 				A4B1E31C1C50C3AE006328FE /* RootViewController.m */,
+				A4B1E3101C4F6B5D006328FE /* MyGlViewController.h */,
+				A4B1E3111C4F6B5D006328FE /* MyGlViewController.mm */,
+				A4B1E3121C4F6B5D006328FE /* MyGlViewController.xib */,
 				A4B1E2E41C4F650F006328FE /* Assets.xcassets */,
 				A4B1E2E61C4F650F006328FE /* LaunchScreen.storyboard */,
 				A4B1E2E91C4F650F006328FE /* Info.plist */,
 				A4B1E2E11C4F650F006328FE /* ModelShow_Nic.xcdatamodeld */,
-				A412B0361CE0428E00B4545C /* ModelFileParser */,
 				A4B1E2DB1C4F650F006328FE /* Supporting Files */,
-				A4B1E2FE1C4F6606006328FE /* stl_parser */,
 				A4B1E2F51C4F655A006328FE /* FrameWork */,
-				A4B1E3101C4F6B5D006328FE /* MyGlViewController.h */,
-				A4B1E3111C4F6B5D006328FE /* MyGlViewController.mm */,
-				A4B1E3121C4F6B5D006328FE /* MyGlViewController.xib */,
 			);
 			path = ModelShow_Nic;
 			sourceTree = "<group>";
@@ -172,12 +184,8 @@
 		A4B1E2FE1C4F6606006328FE /* stl_parser */ = {
 			isa = PBXGroup;
 			children = (
-				A43B8ED01D07B3E400AF78E2 /* man11.obj */,
-				A44CDA0C1C56017A007307FE /* k3.stl */,
-				A4B1E31E1C50C5F5006328FE /* 哆啦A梦.stl */,
 				A4B1E3041C4F667B006328FE /* v.shader */,
 				A4B1E3051C4F667B006328FE /* f.shader */,
-				A4B1E3021C4F666E006328FE /* Tulips.JPG */,
 				A4B1E2FF1C4F664E006328FE /* STLParser.h */,
 				A4B1E3001C4F664E006328FE /* STLParser.m */,
 				A4352F681CDC26E000384509 /* ObjePraser.h */,
