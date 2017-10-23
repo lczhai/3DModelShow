@@ -30,10 +30,9 @@ struct pointInfo
 
 @interface MyGlViewController ()
 
-@property EAGLContext *context;
-@property GLKBaseEffect *effect;
-@property float rotation;
-
+@property EAGLContext *context;//上下文
+@property GLKBaseEffect *effect;//用于设置通用的OpenGL ES环境
+//@property float rotation;
 //@property float *squareVertexData;
 
 
@@ -45,11 +44,14 @@ struct pointInfo
 
 {
     
-    BOOL isExit;
-    CGPoint lastLoc;
+    GLKView *glview;
+    GLuint buffer;//缓冲
+    
+    BOOL isExit;//记录后退操作
+    CGPoint lastLoc;//最后的触摸点
     
     
-    //--------
+    //--------渲染相关
     float _curRed;
     BOOL _increasing;
     float _rotation;
@@ -58,36 +60,34 @@ struct pointInfo
     GLKVector3 _current_position;
     GLKQuaternion _quatStart;
     GLKQuaternion _quat;
-    
     BOOL _slerping;
     float _slerpCur;
     float _slerpMax;
     GLKQuaternion _slerpStart;
     GLKQuaternion _slerpEnd;
-    
-    
-    
     //---------
     
     
-    GLKView *glview;
     
+    
+    //-----模型文件相关
     int dataCount;//模型坐标个数
     float *squareVertexData;//定义数组
     int faceNum;//三角片面数
-    
     float bigSize;//控制模型大小（1-180）
     float modelX;//模型位置x
     float modelY;//模型位置y
     float modelZ;//模型位置z
+    //-----
+    
+    
+    
     
     CGPoint curTickleStart;//手势触及屏幕开始第一个点
-    
-    
     NSMutableArray *xPointRecord;//手势触及点得x坐标集合
     NSMutableArray *yPointRecord;//手势触及点得y坐标集合
     
-    GLuint buffer;//缓冲
+    
     
     
     
@@ -103,16 +103,7 @@ struct pointInfo
 
 
 
-- (void)tearDownGL {
-    
-    [EAGLContext setCurrentContext:self.context];
-    
-    glDeleteBuffers(1, &buffer);
-    //glDeleteVertexArraysOES(1, &_vertexArray);
-    
-    self.effect = nil;
-    
-}
+
 
 
 
@@ -120,132 +111,47 @@ struct pointInfo
     [super viewDidLoad];
     
     self.title = @"模型";
-    [SVProgressHUD dismiss];
-    [self tearDownGL];
     
     
     
-    //------
+    [self setNavigationItemAndPath];//创建导航按钮及设置导航路径
+   
+    
+    
+    //------初始值
     _rotMatrix = GLKMatrix4Identity;
     _quat = GLKQuaternionMake(0, 0, 0, 1);
     _quatStart = GLKQuaternionMake(0, 0, 0, 1);
-    
     //-------
     
     
-    
-    
-    
-    //自定义导航栏返回按钮
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"back" style:UIBarButtonItemStyleDone target:self action:@selector(backButton_OnClick:)];
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"changecolor" style:UIBarButtonItemStyleDone target:self action:@selector(changeColor)];
-    //获取当前的当行进程内的所有ViewController
-    NSMutableArray *oldViewControllers =[[NSMutableArray alloc]initWithArray: self.navigationController.viewControllers];
-    //    [oldViewControllers removeObject:self];
-    //判断当前进程中是否已经到达三个ViewController，若为三个则经第二个controller删除并充值导航
-    if (oldViewControllers.count == 3) {
-        [oldViewControllers removeObjectAtIndex:1];
-        
-        
-        [UIView animateWithDuration:3 animations:^{
-            [self.navigationController setViewControllers:[oldViewControllers copy] animated:YES];
-        }];
-        
-    }
-    
-    
-    
+
     
     glview = [[GLKView alloc]init];//声明glview
     [self setView:glview];//将glview作为glkviewcontroller主视图
     [self modelParser:curFileName];//解析模型文件
+    [self setMaskViewForGLView];//创建遮罩视图
+    [self setSegmentControlFroGLView];//创建多段选择视图
     
     
     
-    
-    maskView = [[UIView alloc]initWithFrame:[UIScreen mainScreen].bounds];
-    maskView.backgroundColor = [UIColor colorWithRed:131/255.0 green:166/255.0 blue:205/255.0 alpha:1.000];
-    [self.view addSubview:maskView];
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    if (self.modelList.count > 1) {
-        //多段选择视图对象可以接受一个数组作为item
-        //创建多段选择视图对象
-        UISegmentedControl *seg=[[UISegmentedControl alloc]initWithItems:[self getSegmentControlIndexWithArray:self.modelList]];
-        seg.frame = CGRectMake([UIScreen mainScreen].bounds.size.width*0.25, [UIScreen mainScreen].bounds.size.height-50, [UIScreen mainScreen].bounds.size.width/2, 30);
-        //设置多段选择视图某段为默认选择状态
-        
-        for (int i =0 ; i<self.modelList.count; i++) {
-            NSString *filepath = self.modelList[i];
-            
-            
-            
-            
-            if ([filepath isEqualToString:curFileName]) {
-                seg.selectedSegmentIndex = i;
-                break;
-            }
-        }
-        
-        //给多段选择视图一个颜色
-        seg.tintColor = [UIColor blueColor];
-        [seg addTarget:self action:@selector(segmentChanged:) forControlEvents:UIControlEventValueChanged];//添加事件
-        [glview addSubview:seg];
-    }
 }
-#pragma mark -- 改变模型颜色
-- (void)changeColor{
-    NSArray *color = [self randomColor];
-    self.effect.light0.diffuseColor = GLKVector4Make([color[0] floatValue], [color[1] floatValue], [color[2] floatValue], 1.0);//漫反射颜色,依然按照rgb
-}
-#pragma mark -- 获取随机颜色
-- (NSArray *) randomColor
-{
-    CGFloat hue = ( arc4random() % 256 / 256.0 ); //0.0 to 1.0
-    CGFloat saturation = ( arc4random() % 256 / 256.0 ) ; // 0.0 to 1.0,away from white
-    CGFloat brightness = ( arc4random() % 256 / 256.0 ) ; //0.0 to 1.0,away from black
-    NSArray *rgbArray = [NSArray arrayWithObjects:[NSString stringWithFormat:@"%g",hue],[NSString stringWithFormat:@"%g",saturation],[NSString stringWithFormat:@"%g",brightness], nil];
-    return rgbArray;
-}
+
+
 
 
 #pragma mark -- 按钮点击事件
 - (void)segmentChanged:(UISegmentedControl *)sender
 {
-    
-    maskView.hidden = NO;
-    
-    
-    
-    NSInteger selectedSegment = sender.selectedSegmentIndex;
-    
-    
     [SVProgressHUD show];
-    
-    
-    //GCD执行
-    dispatch_async(dispatch_get_main_queue(), ^{
-        
-        
-        NSString *modelPath =  self.modelList[selectedSegment];
-        NSLog(@"model name:  %@",modelPath);
-        //操作2
-        NSArray *files = self.modelList;
-        
-        MyGlViewController *glk = [[MyGlViewController alloc]init];
-        glk.curFileName = modelPath;
-        glk.modelList = files;
-        [self.navigationController pushViewController:glk animated:NO];
-    });
-    
-    
+    maskView.hidden = NO;
+    NSInteger selectedSegment = sender.selectedSegmentIndex;
+    NSString *modelPath =  self.modelList[selectedSegment];
+    NSArray *files = self.modelList;
+    MyGlViewController *glk = [[MyGlViewController alloc]init];
+    glk.curFileName = modelPath;
+    glk.modelList = files;
+    [self.navigationController pushViewController:glk animated:NO];
 }
 
 
@@ -272,20 +178,13 @@ struct pointInfo
     
     //    NSLog(@"%@",[[cfileName componentsSeparatedByString:@"."]lastObject]);
     if ([[[cfileName componentsSeparatedByString:@"."]lastObject] caseInsensitiveCompare:@"stl"]  == NSOrderedSame) {
-        
         NSLog(@"是stl文件");
         [self renderingSTL:cfileName];
-        
-        
-        
     }
     else
     {
         NSLog(@"是obj文件");
-        
-        
         [self renderingOBJ:cfileName];
-        
     }
     
     
@@ -294,47 +193,63 @@ struct pointInfo
 #pragma mark --读取stl
 - (void)renderingSTL:(NSString *)filePath
 {
-    //创建于解析方法内结构体内一直的结构体
-    struct pointInfo
-    {
-        float *squareVertexData;
-        int   faceNum;
-    };
-    //取到解析方法返回的NSValue（携带结构体参数）
-    NSValue *value   = [ZLCStlparser ParserStlFileWithfilaPath:filePath];
-    //定义结构体接受NSValue内的结构体参数
-    pointInfo pro ;
-    [value getValue:&pro];
-    //赋值
-    squareVertexData = pro.squareVertexData;
-    faceNum          = pro.faceNum;
     
-    
-    
-    
-    
-    [self renderUI:squareVertexData];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        //创建于解析方法内结构体内一直的结构体
+        struct pointInfo
+        {
+            float *squareVertexData;
+            int   faceNum;
+        };
+        //取到解析方法返回的NSValue（携带结构体参数）
+        NSValue *value   = [ZLCStlparser ParserStlFileWithfilaPath:filePath];
+        //定义结构体接受NSValue内的结构体参数
+        pointInfo pro ;
+        [value getValue:&pro];
+        //赋值
+        squareVertexData = pro.squareVertexData;
+        faceNum          = pro.faceNum;
+        
+        // 回到主线程
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [SVProgressHUD dismiss];
+            [self renderUI:squareVertexData];
+        });
+    });
+
 }
 
 #pragma mark --读取OBJ
 - (void)renderingOBJ:(NSString*)filaPath
 {
-    NSLog(@"%@",filaPath);
     
     
-    //取到解析方法返回的NSValue（携带结构体参数）
-    NSValue *value   = [ZLCObjeparser ParserObjFileWithfilaPath:filaPath];
+    //在线程中进行耗时操作拿到数据后返回主线程进行reload
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
+        //取到解析方法返回的NSValue（携带结构体参数）
+        NSValue *value   = [ZLCObjeparser ParserObjFileWithfilaPath:filaPath];
+        
+        //定义结构体接受NSValue内的结构体参数
+        pointInfo pro ;
+        [value getValue:&pro];
+        
+        //赋值
+        squareVertexData = pro.squareVertexData;
+        faceNum          = pro.faceNum;
+        
+        // 回到主线程
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [SVProgressHUD dismiss];
+            //将值传给opengl进行渲染
+            [self renderUI:squareVertexData];
+        });
+    });
     
-    //定义结构体接受NSValue内的结构体参数
-    pointInfo pro ;
-    [value getValue:&pro];
     
-    //赋值
-    squareVertexData = pro.squareVertexData;
-    faceNum          = pro.faceNum;
     
-    //将值传给opengl进行渲染
-    [self renderUI:squareVertexData];
+    
+    
     
 }
 
@@ -342,18 +257,13 @@ struct pointInfo
 
 //4、修改模型视图矩阵
 //有两个方法解决这个问题：一是修改原始的顶点数据（Z轴值），使之透视视点；二是通过所谓的“模型视图矩阵”，将正方形“变换”到远一点的位置。
-
 - (void)update
 {
-    
-    
-    
     CGSize size                            = self.view.bounds.size;
     float aspect                           = fabs(size.width / size.height);
     GLKMatrix4 projectionMatrix            = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(bigSize), aspect, 1.0f, 10.0f);//GLKMathDegreesToRadians值越大，模型越小(0-180)
     
     self.effect.transform.projectionMatrix = projectionMatrix;
-    
     
     //模型复原
     if (_slerping) {
@@ -368,9 +278,6 @@ struct pointInfo
         
         _quat = GLKQuaternionSlerp(_slerpStart, _slerpEnd, slerpAmt);
     }
-    
-    
-    
     
     
     GLKMatrix4 modelViewMatrix = GLKMatrix4MakeTranslation(0.0f, 0.0f, -6.0f);
@@ -569,9 +476,7 @@ struct pointInfo
 
 //双击屏幕
 - (void)doubleTap:(UITapGestureRecognizer *)tap {
-    
-    
-    
+   
     [UIView animateWithDuration:1 animations:^{
         _slerping = YES;
         _slerpCur = 0;
@@ -611,14 +516,6 @@ struct pointInfo
     
     modelX           = modelX + (xhou - xqian)/100;
     modelY           = modelY - (yhou - yqian)/100;
-    
-    
-    
-    
-    
-    
-    
-    
     
 }
 
@@ -888,23 +785,6 @@ struct pointInfo
 }
 
 
-
-
-
-//当页面彻底消失时候
-//- (void)viewDidDisappear:(BOOL)animated
-//{
-//    glDeleteBuffers(1, &buffer);
-//
-//}
-
-
-
-
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-    
-    
-}
 - (void)computeIncremental {
     
     GLKVector3 axis = GLKVector3CrossProduct(_anchor_position, _current_position);
@@ -917,11 +797,9 @@ struct pointInfo
     // TODO: Do something with Q_rot...
     _quat = GLKQuaternionMultiply(Q_rot, _quatStart);
     
-    
-    
-    
-    
 }
+
+
 - (GLKVector3) projectOntoSurface:(GLKVector3) touchPoint
 {
     //    float radius = self.view.bounds.size.width/3;
@@ -964,12 +842,6 @@ struct pointInfo
 
 
 
-- (void)viewWillDisappear:(BOOL)animated
-{
-    UILabel *label = [self.navigationController.view viewWithTag:888];
-    [label removeFromSuperview];
-    
-}
 
 
 
@@ -981,32 +853,109 @@ struct pointInfo
     [self.navigationController popViewControllerAnimated:YES];
 }
 
-- (void)viewDidDisappear:(BOOL)animated
-{
+
+
+#pragma mark --初始化及创建view
+//设置导航路径及导航上按钮
+- (void)setNavigationItemAndPath{
+    //自定义导航栏返回按钮
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"back" style:UIBarButtonItemStyleDone target:self action:@selector(backButton_OnClick:)];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc]initWithTitle:@"changecolor" style:UIBarButtonItemStyleDone target:self action:@selector(changeColor)];
+    //获取当前的当行进程内的所有ViewController
+    NSMutableArray *oldViewControllers =[[NSMutableArray alloc]initWithArray: self.navigationController.viewControllers];
+    //    [oldViewControllers removeObject:self];
     
-    if (isExit) {
-        [EAGLContext setCurrentContext:self.context];
+    //判断当前进程中是否已经到达三个ViewController，若为三个则经第二个controller删除并充值导航
+    if (oldViewControllers.count == 3) {
+        [oldViewControllers removeObjectAtIndex:1];
+        [UIView animateWithDuration:3 animations:^{
+            [self.navigationController setViewControllers:[oldViewControllers copy] animated:YES];
+        }];
         
-        
-        glDeleteBuffers(1, &buffer);
-        //glDeleteVertexArraysOES(1, &_vertexArray);
-        
-        self.effect = nil;    }
-    
+    }
 }
 
+//创建遮罩视图
+- (void)setMaskViewForGLView{
+    self.view.backgroundColor = [UIColor whiteColor];
+    maskView = [[UIView alloc]initWithFrame:[UIScreen mainScreen].bounds];
+    maskView.backgroundColor = [UIColor colorWithRed:131/255.0 green:166/255.0 blue:205/255.0 alpha:1.000];
+    [self.view addSubview:maskView];
+}
+
+//创建多段选择视图
+- (void)setSegmentControlFroGLView{
+    if (self.modelList.count > 1) {
+        //创建多段选择视图对象
+        UISegmentedControl *seg=[[UISegmentedControl alloc]initWithItems:[self getSegmentControlIndexWithArray:self.modelList]];
+        seg.frame = CGRectMake([UIScreen mainScreen].bounds.size.width*0.25, [UIScreen mainScreen].bounds.size.height-50, [UIScreen mainScreen].bounds.size.width/2, 30);
+        //设置多段选择视图某段为默认选择状态
+        for (int i =0 ; i<self.modelList.count; i++) {
+            NSString *filepath = self.modelList[i];
+            if ([filepath isEqualToString:curFileName]) {
+                seg.selectedSegmentIndex = i;
+                break;
+            }
+        }
+        
+        //给多段选择视图一个颜色
+        seg.tintColor = [UIColor blueColor];
+        [seg addTarget:self action:@selector(segmentChanged:) forControlEvents:UIControlEventValueChanged];//添加事件
+        [glview addSubview:seg];
+    }
+}
+
+
+#pragma mark --常规函数
 
 //为segmentcontrol生成顺号
 - (NSArray *)getSegmentControlIndexWithArray:(NSArray *)modelList
 {
     NSMutableArray *indexArr = [[NSMutableArray alloc]init];
-    
     for (int i=0; i<modelList.count; i++) {
         [indexArr addObject:[NSString stringWithFormat:@"%d",i+1]];
     }
-    
     return indexArr;
 }
 
+//删除顶点和索引缓冲区
+- (void)tearDownGL {
+    [EAGLContext setCurrentContext:self.context];
+    glDeleteBuffers(1, &buffer);
+    //glDeleteVertexArraysOES(1, &_vertexArray);
+    self.effect = nil;
+}
+
+//改变模型颜色
+- (void)changeColor{
+    NSArray *color = [self randomColor];
+    self.effect.light0.diffuseColor = GLKVector4Make([color[0] floatValue], [color[1] floatValue], [color[2] floatValue], 1.0);//漫反射颜色,依然按照rgb
+}
+
+//获取随机颜色
+- (NSArray *) randomColor
+{
+    CGFloat hue = ( arc4random() % 256 / 256.0 ); //0.0 to 1.0
+    CGFloat saturation = ( arc4random() % 256 / 256.0 ) ; // 0.0 to 1.0,away from white
+    CGFloat brightness = ( arc4random() % 256 / 256.0 ) ; //0.0 to 1.0,away from black
+    NSArray *rgbArray = [NSArray arrayWithObjects:[NSString stringWithFormat:@"%g",hue],[NSString stringWithFormat:@"%g",saturation],[NSString stringWithFormat:@"%g",brightness], nil];
+    return rgbArray;
+}
+
+
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    UILabel *label = [self.navigationController.view viewWithTag:888];
+    [label removeFromSuperview];
+    
+}
+
+- (void)viewDidDisappear:(BOOL)animated
+{
+    if (isExit) {
+        [self tearDownGL];
+    }
+}
 
 @end

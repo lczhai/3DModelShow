@@ -8,10 +8,7 @@
 
 #import <GLKit/GLKit.h>
 #import <OpenGLES/ES1/gl.h>
-
-
 #import "SVProgressHUD.h"
-
 #import "ZLCObjeparser.h"
 #import "ZLCStlparser.h"
 

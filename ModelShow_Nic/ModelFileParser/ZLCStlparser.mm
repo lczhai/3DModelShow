@@ -77,18 +77,8 @@ struct pointInfo
     
     
     if (mTxt == nil) {
-        
         NSLog(@"binary");
-        
        value = [self parserBinary:path];
-        
-        
-        
-        
-        
-        
-        
-        
     }
     else
     {

@@ -9,7 +9,6 @@
 #import <UIKit/UIKit.h>
 #import "MyGlViewController.h"
 #import "SVProgressHUD.h"
-
 #import "NewParser.h"
 
 @interface RootViewController : UIViewController<UITableViewDelegate,UITableViewDataSource>
